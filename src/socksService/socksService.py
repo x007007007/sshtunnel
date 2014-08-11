@@ -2,30 +2,21 @@
 # -*- coding:utf8 -*-
 # vim: set fileencoding=utf8 
 
-import SocketServer,struct,socket,select
-import logging, time
-import paramiko
-logger = logging.getLogger() 
-hdlr = logging.FileHandler('sendlog.txt')
-logger.addHandler(hdlr)
+import SocketServer, struct, socket, select, paramiko
 
-class SocksException(Exception): pass
-
+class SocksException(Exception): pass 
 class SocksIdentifyException(SocksException): pass
 class SocksIdentifyFailed(SocksIdentifyException): pass
 class SocksIdentifyDisabled(SocksIdentifyException): pass
-
 class SocksNegotiateException(SocksException): pass
 class SocksAddressTypeDisabled(SocksNegotiateException): pass
-
 class SocksRemoteException(SocksException): pass
 class SocksClientException(SocksException): pass
 
 
 class SocksRequestHandler(SocketServer.StreamRequestHandler):
-    @staticmethod
-    def log(level, msg):
-        print level,msg
+    def log(self, level, msg):
+        pass #print level,msg
          
     def get_socks5_connect_socket(self,dst,src,dst_type='\x01'):
         '''
@@ -176,11 +167,11 @@ class SocksRequestHandler(SocketServer.StreamRequestHandler):
                 exchange_data(remote_sp,self.request)
             elif cmd == '\x03':   #udp
                 pass
-#         except SocksException,e:
-#             print 'SocksException',e.message
-#             raise e;
+        except SocksException,e:
+             self.log('warning','SocksException:%s'%e.message)
         except socket.error,e:
             print 'socket.error',e.message
+
 
 class SocksRemoteRequestHandler(object):
 
@@ -210,8 +201,11 @@ class SocksRemoteRequestHandler(object):
     def udp_handle(self, dst, src, dst_type='\x01'):
         return None,None
 
+
 class SocksSSHRemoteRequestHandler(SocksRemoteRequestHandler):
     old_conversation=None
+    errnum=0
+    reconnectnum=0
     def __init__(self, domain, username, password, port=22):
         self.domain=domain
         self.username=username
@@ -229,15 +223,36 @@ class SocksSSHRemoteRequestHandler(SocksRemoteRequestHandler):
         return conversation
     
     def get_socket(self,conversation,dst,src):
-        trans=conversation.get_transport()
-        res=trans.open_channel('direct-tcpip', dst, src)
-        res.settimeout(5)
-        return res
+        try:
+            trans=conversation.get_transport()
+            res=trans.open_channel('direct-tcpip', dst, src)
+            res.settimeout(5)
+            return res
+        except paramiko.ChannelException,e:
+            print 'retry %s:%d'%dst
+            try:
+                trans=conversation.get_transport()
+                res=trans.open_channel('direct-tcpip', dst, src)
+                res.settimeout(5)
+                return res
+            except paramiko.ChannelException,e:
+                self.errnum+=1
+                raise SocksRemoteException, e.message
+        
     
     def connect_handle(self, dst, src, dst_type='\x01'):
         if self.old_conversation is None:
             self.old_conversation = self.get_conversation()
-        socket=self.get_socket(self.old_conversation, dst, src)
+        try:
+            socket=self.get_socket(self.old_conversation, dst, src)
+            self.reconnectnum=0
+        except paramiko.SSHException, e:
+            if not self.reconnectnum>5: 
+                self.reconnectnum+=1
+                self.old_conversation=self.get_conversation
+                return self.connect_handle(dst, src, dst_type)
+            else:
+                raise SocksRemoteException, '多次重试无效'
         return socket,'\x01'
     
     
@@ -248,11 +263,11 @@ class SocksServer(SocketServer.TCPServer):
         else:
             raise SocksRemoteException
         SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
+
+
 class ThreadingSocksServer(SocketServer.ThreadingMixIn, SocksServer): pass
+
+
 class ForkingSocksServer(SocketServer.ForkingMixIn, SocksServer): pass
 
-sshtunnel=SocksSSHRemoteRequestHandler('p5.fanfan8.com','2012111001' ,'299792458')
-print 'sshtunnel',sshtunnel.connect_handle
 
-server = ThreadingSocksServer(('127.0.0.1',4444), SocksRequestHandler, sshtunnel)
-server.serve_forever()

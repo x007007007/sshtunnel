@@ -34,11 +34,13 @@ if 'TRUE'==config.get('log','enabled'):
 password=config.get('ssh', 'password')
 username=config.get('ssh', 'username')
 domain=config.get('ssh','domain')
-port=config.get('ssh','port')
-
+port=int(config.get('ssh','port'))
+server_port=int(config.get('server','port'))
+server_listen=config.get('server','listen')
 
 sshtunnel=SocksSSHRemoteRequestHandler(domain, username, password, port)
-print 'sshtunnel',sshtunnel.connect_handle
 
-server = ThreadingSocksServer(('127.0.0.1',4444), SocksRequestHandler, sshtunnel)
+server = ThreadingSocksServer(( server_listen,server_port),
+                                SocksRequestHandler,
+                                sshtunnel)
 server.serve_forever()

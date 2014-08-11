@@ -211,7 +211,6 @@ class SocksSSHRemoteRequestHandler(SocksRemoteRequestHandler):
         self.username=username
         self.password=password
         self.port=port
-        print 'init'
 
     def get_conversation(self):
         conversation = paramiko.SSHClient()

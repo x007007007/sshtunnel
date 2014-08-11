@@ -2,7 +2,7 @@
 # -*- coding:utf8 -*-
 # vim: set fileencoding=utf8
 
-import logging, time
+import logging, time, os
 from ConfigParser import SafeConfigParser
 from socksService import ThreadingSocksServer, SocksSSHRemoteRequestHandler, \
     SocksRequestHandler
@@ -10,7 +10,7 @@ from socksService import ThreadingSocksServer, SocksSSHRemoteRequestHandler, \
 def setlog(path,lvl=logging.DEBUG):
     logger = logging.getLogger() 
     logger.setLevel(logging.DEBUG)
-    logger_hdlr = logging.FileHandler('sendlog.txt')
+    logger_hdlr = logging.FileHandler(path)
     logger_fmt = logging.Formatter('%(name)-12s %(asctime)s %(levelname)-8s %(message)s', '%a, %d %b %Y %H:%M:%S')
     logger_hdlr.setFormatter(logger_fmt)
     logger.addHandler(logger_hdlr)
@@ -28,7 +28,7 @@ def setlog(path,lvl=logging.DEBUG):
     SocksRequestHandler.log=log 
 
 config = SafeConfigParser()
-config.read('sshtunnel.conf')
+config.read('%s/.config/sshtunnel.conf'%os.path.abspath(os.getenv('HOME')))
 if 'TRUE'==config.get('log','enabled'):
     setlog(config.get('log','path'),int(config.get('log','level')))
 password=config.get('ssh', 'password')

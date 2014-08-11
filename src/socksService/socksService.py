@@ -1,7 +1,8 @@
 #!/usr/bin/python2.7
 # -*- coding:utf8 -*-
 # vim: set fileencoding=utf8 
-
+import sys
+sys.path.append('./src')
 import SocketServer, struct, socket, select, paramiko
 
 class SocksException(Exception): pass 
@@ -169,8 +170,8 @@ class SocksRequestHandler(SocketServer.StreamRequestHandler):
                 pass
         except SocksException,e:
              self.log('warning','SocksException:%s'%e.message)
-        except socket.error,e:
-            print 'socket.error',e.message
+#         except socket.error,e:
+#             print 'socket.error',e.message
 
 
 class SocksRemoteRequestHandler(object):
@@ -215,10 +216,17 @@ class SocksSSHRemoteRequestHandler(SocksRemoteRequestHandler):
     def get_conversation(self):
         conversation = paramiko.SSHClient()
         conversation.set_missing_host_key_policy(paramiko.WarningPolicy())
-        conversation.connect( self.domain,
-                              port=self.port,
-                              username=self.username,
-                              password=self.password)
+        try:
+            conversation.connect( self.domain,
+                                  port=self.port,
+                                  username=self.username,
+                                  password=self.password)
+        except socket.gaierror , e :
+            raise SocksRemoteException, '链接代理失败'
+        except paramiko.AuthenticationException, e:
+            raise SocksRemoteException, '用户认证失败'
+        except paramiko.BadHostKeyException, e:
+            raise SocksRemoteException, 'Host Key 验证失败'
         return conversation
     
     def get_socket(self,conversation,dst,src):
@@ -248,7 +256,7 @@ class SocksSSHRemoteRequestHandler(SocksRemoteRequestHandler):
         except paramiko.SSHException, e:
             if not self.reconnectnum>5: 
                 self.reconnectnum+=1
-                self.old_conversation=self.get_conversation
+                self.old_conversation=self.get_conversation()
                 return self.connect_handle(dst, src, dst_type)
             else:
                 raise SocksRemoteException, '多次重试无效'

@@ -40,3 +40,8 @@ nosetests.xml
 .git
 .git/*
 
+.project
+.pydevproject
+.gitignore
+*~
+.gitignore

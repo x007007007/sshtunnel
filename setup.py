@@ -13,7 +13,5 @@ setup(name='sshtunnel',
       install_requires=['paramiko'],
       package_dir = {'': 'src'},
       packages=['socksService'],
-      scripts=['script/sshtunnel.py'],
-      include_package_data=True,
-      package_data={"conf": ['script/sshtunnel.conf',]}
+      scripts=['script/sshtunnel.py','script/sshtunnel.conf'],
      )

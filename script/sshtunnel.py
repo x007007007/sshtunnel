@@ -2,18 +2,11 @@
 # -*- coding:utf8 -*-
 # vim: set fileencoding=utf8
 
-try:
-    from socksService import ThreadingSocksServer, SocksSSHRemoteRequestHandler, \
-    SocksRequestHandler
-except:
-    import sys, os
-    sys.path.append('%s/../src'%(os.path.dirname(__file__)))
-    from socksService import ThreadingSocksServer, SocksSSHRemoteRequestHandler, \
+from socksService import ThreadingSocksServer, SocksSSHRemoteRequestHandler, \
     SocksRequestHandler
 
 import logging, time, os
 from ConfigParser import SafeConfigParser
-
     
 def setlog(path,lvl=logging.DEBUG):
     logger = logging.getLogger() 

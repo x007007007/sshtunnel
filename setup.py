@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 from setuptools import setup
-from ez_setup import use_setuptools
-use_setuptools()
+
 
 setup(name='sshtunnel',
       version='0.1',

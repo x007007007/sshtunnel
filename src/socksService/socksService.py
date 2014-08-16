@@ -1,8 +1,7 @@
 #!/usr/bin/python2.7
 # -*- coding:utf8 -*-
 # vim: set fileencoding=utf8 
-import sys
-sys.path.append('./src')
+
 import SocketServer, struct, socket, select, paramiko
 
 class SocksException(Exception): pass 

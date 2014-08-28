@@ -168,7 +168,7 @@ class SocksRequestHandler(SocketServer.StreamRequestHandler):
             elif cmd == '\x03':   #udp
                 pass
         except SocksException,e:
-             self.log('warning','SocksException:%s'%e.message)
+            self.log('warning','SocksException:%s'%e.message)
 #         except socket.error,e:
 #             print 'socket.error',e.message
 

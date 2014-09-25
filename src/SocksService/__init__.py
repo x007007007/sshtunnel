@@ -1,3 +1,3 @@
-from SocksService.SocksService import SocksServer, \
+from SocksService import SocksServer, \
     ThreadingSocksServer, ForkingSocksServer, \
     SocksSSHRemoteRequestHandler, SocksRequestHandler

@@ -3,8 +3,8 @@
 from setuptools import setup
 
 
-setup(name='sshtunnel',
-      version='0.1',
+setup(name='Xsshtunnel',
+      version='0.2',
       description='SSH socks proxy',
       long_description=open('README.md').read(),
       author='x007007007',
@@ -12,6 +12,7 @@ setup(name='sshtunnel',
       url='https://github.com/x007007007/sshtunnel',
       install_requires=['paramiko'],
       package_dir = {'': 'src'},
-      packages=['socksService'],
-      scripts=['script/sshtunnel.py','script/sshtunnel.conf'],
+      packages=['SocksService'],
+      scripts=['script/sshsocks.py'],
+      data_files=[('config', ['cfg/sshsocks.conf'])]
      )

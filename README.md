@@ -14,10 +14,9 @@ TODO
 INSTALL&RUN
 -------
 1. pip install paramiko
-1. python setup.py build
-1. python setup.py install
-1. copy script/sshtunnel.conf to ${HOME}/.config/sshtunnel.conf
-1. edit sshtunnel.conf write your account info
-1. run sshtunnel.py
+1. pip install sshsocks
+1. sshsocks -C to init ~/.config/sshsocks.conf
+1. edit $HOME/.config/sshsocks.conf write your account info
+1. run sshsocks.py
 
 

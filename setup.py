@@ -3,7 +3,7 @@
 from setuptools import setup
 
 
-setup(name='Xsshtunnel',
+setup(name='sshsocks',
       version='0.2',
       description='SSH socks proxy',
       long_description=open('README.md').read(),

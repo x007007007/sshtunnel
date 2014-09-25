@@ -34,7 +34,7 @@ def help():
 
 def run():
     config = SafeConfigParser()
-    config.read('%s/.config/sshtunnel.conf'%os.path.abspath(os.getenv('HOME')))
+    config.read('%s/.config/sshsocks.conf'%os.path.abspath(os.getenv('HOME')))
     if 'TRUE' == config.get('log','enabled'):
         setlog(config.get('log', 'path'),int(config.get('log', 'level')))
     password = config.get('ssh', 'password')
@@ -61,7 +61,9 @@ if __name__ == '__main__':
                 help()
                 exit()
             elif cmd in ('--init-config', '-C'):
-                pass
+                import shutil
+                home_config_path = '%s/.config/sshsocks.conf'%os.path.abspath(os.getenv('HOME'))
+                shutil.copy('cfg/sshsocks.conf', home_config_path)
                 exit()
             elif cmd in ('--version', '-v'):
                 print 'alpha'

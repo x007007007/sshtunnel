@@ -4,7 +4,7 @@ from setuptools import setup
 
 
 setup(name='sshsocks',
-      version='0.2',
+      version='0.2.1',
       description='SSH socks proxy',
       long_description=open('README.md').read(),
       author='x007007007',

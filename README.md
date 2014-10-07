@@ -6,6 +6,7 @@ this tunnel can auto reconnect
 
 TODO
 ----
+1. Add i18n support
 1. Bind socks support
 1. DPD(dead peer detection) support
 1. Multiple accounts support

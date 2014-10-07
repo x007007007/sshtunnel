@@ -135,8 +135,8 @@ class SocksRequestHandler(SocketServer.StreamRequestHandler):
             self.request.send('\x05\x00')
             return True
         else:
-            raise SocksIdentifyDisabled(\
-                        'Just support No authentication required')
+            msg = 'Just support No authentication required'
+            raise SocksIdentifyDisabled(msg)
 
     def handle(self):
         """
@@ -187,8 +187,8 @@ class SocksRequestHandler(SocketServer.StreamRequestHandler):
                 return success BND protocol return sequences
             """
             self.log('debug', 'atype:%r ,(%s,%d)' % (atype,
-                                                   addr,
-                                                   port))
+                                                     addr,
+                                                     port))
             if atype == '\x01':  # ipv4
                 msg = '\x05\x00\x00\x01%s%s' % (
                     socket.inet_aton(addr),
@@ -218,9 +218,9 @@ class SocksRequestHandler(SocketServer.StreamRequestHandler):
                 self.log('debug', '%r' % e)
                 raise SocksClientException
             self.log('debug', 'recv msg:%r%r%r%r' % (version,
-                                                   cmd,
-                                                   _,
-                                                   atype))
+                                                     cmd,
+                                                     _,
+                                                     atype))
             if atype == '\x01':  # ipv4
                 addr = socket.inet_ntoa(self.request.recv(4))
             elif atype == '\x03':  # domain
@@ -239,14 +239,15 @@ class SocksRequestHandler(SocketServer.StreamRequestHandler):
                     self.get_s5_conn_sp((addr, port), \
                                         self.request.getpeername(), \
                                         atype)
-                if remote_sp is None: return  # don't get remote socket
+                # don't get remote socket
+                if remote_sp is None: return
                 try:
                     bnd_addr, bnd_port = remote_sp.getpeername()
                 except socket.error, e:
-                    raise SocksRemoteException, e
+                    raise SocksRemoteException(e)
                 self.log('notify',
                          'connect remote bnd:(%s,%d)' % (bnd_addr,
-                                                       bnd_port))
+                                                         bnd_port))
                 reply_client_bnd(remote_atype, bnd_addr, bnd_port)
                 exchange_data(remote_sp, self.request)
             elif cmd == '\x02':  # bind
@@ -323,8 +324,8 @@ class SocksSSHRemoteRequestHandler(SocksRemoteRequestHandler):
         create a ssh conversation
         '''
         conversation = paramiko.SSHClient()
-        conversation.set_missing_host_key_policy(\
-                    paramiko.WarningPolicy())
+        ssh_policy = paramiko.WarningPolicy()
+        conversation.set_missing_host_key_policy(ssh_policy)
         try:
             conversation.connect(self.domain,
                                  port=self.port,
@@ -361,16 +362,16 @@ class SocksSSHRemoteRequestHandler(SocksRemoteRequestHandler):
         if self.old_conversation is None:
             self.old_conversation = self.get_conversation()
         try:
-            socket = self.get_socket(self.old_conversation, dst, src)
+            sp = self.get_socket(self.old_conversation, dst, src)
             self.reconnectnum = 0
-        except paramiko.SSHException, e:
+        except paramiko.SSHException:
             if not self.reconnectnum > 5:
                 self.reconnectnum += 1
                 self.old_conversation = self.get_conversation()
                 return self.connect_handle(dst, src, dst_type)
             else:
                 raise SocksRemoteException('多次重试无效')
-        return socket, '\x01'
+        return sp, '\x01'
 
 
 class SocksServer(SocketServer.TCPServer):
@@ -385,8 +386,8 @@ class SocksServer(SocketServer.TCPServer):
             raise SocksRemoteException
         try:
             SocketServer.TCPServer.__init__(self, server_address,
-                                        RequestHandlerClass,
-                                        bind_and_activate)
+                                            RequestHandlerClass,
+                                            bind_and_activate)
         except socket.error, e:
             if e.errno == 98:
                 print 'Address already in use, Socks service start failed'
@@ -394,10 +395,10 @@ class SocksServer(SocketServer.TCPServer):
                 print e
             exit()
 
+
 class ThreadingSocksServer(SocketServer.ThreadingMixIn, SocksServer):
     pass
 
+
 class ForkingSocksServer(SocketServer.ForkingMixIn, SocksServer):
     pass
-
-
